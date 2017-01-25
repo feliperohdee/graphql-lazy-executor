@@ -2,7 +2,7 @@
 
 # Small Orange GraphQL Lazy Executor
 
-This executor pre validate and parse the query and returns a function which once executed, it returns an RxJS Observable with the result. Useful in high performance scenarios, once the query can be pre validated and parsed, and postpone the execution.
+This executor pre validate and parse the query and returns a function which once executed, it returns a RxJS Observable with the result. Useful in high performance scenarios, once the query can be pre validated and parsed, and postpone the execution.
 
 ## Api
 		lazyExecutor(
