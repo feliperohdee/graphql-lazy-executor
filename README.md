@@ -73,7 +73,7 @@ This executor pre validate and parse the query and returns a function which once
             // will print
             {
             	data: {
-	                name: 'Rohde - 20',
-	                dog: 'Heron - 3'
+	                name: 'Rohde',
+	                dog: 'Heron'
 	            }
             }
