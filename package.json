@@ -20,5 +20,10 @@
     "mocha": "^3.2.0",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feliperohdee/smallorange-graphql-lazy-executor"
+  },
+  "homepage": "https://smallorange.co"
 }
