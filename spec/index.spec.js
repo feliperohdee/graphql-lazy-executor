@@ -47,6 +47,12 @@ const schema = new GraphQLSchema({
                 }, context, info) => {
                     return age ? `${root.dog} - ${age}` : root.dog;
                 }
+            },
+            error: {
+                type: GraphQLString,
+                resolve: () => {
+                    throw new Error('error');
+                }
             }
         }
     }),
@@ -63,10 +69,6 @@ describe('index.js', () => {
 
     after(() => {
         executeSpy.restore();
-    });
-
-    it('should throw if query is invalid', () => {
-        expect(() => lazyExecutor(schema, `{name{name}}`)).to.throw('GraphQLError: Field "name" must not have a selection since type "String" has no subfields.');
     });
 
     it('should return a function', () => {
@@ -232,6 +234,27 @@ describe('index.js', () => {
             .subscribe(null, err => {
                 expect(err.message).to.equal('Variable "$age" of required type "Int!" was not provided.')
 
+                done();
+            });
+    });
+
+    it('should handle query error', done => {
+        lazyExecutor(schema, `{name{name}}`)
+            .subscribe(null, err => {
+                expect(err.message).to.equal('GraphQLError: Field "name" must not have a selection since type "String" has no subfields.');
+
+                done();
+            });
+    });
+
+    it('should handle internal error', done => {
+        const errorQuery = lazyExecutor(schema, `{
+            error
+        }`);
+
+        errorQuery()
+            .subscribe(null, err => {
+                expect(err.message).to.equal('GraphQLError: error');
                 done();
             });
     });

@@ -17,20 +17,25 @@ module.exports = (schema, query) => {
     );
 
     if (errors.length) {
-        throw errors;
+        return Observable.throw(new Error(errors));
     }
 
     return (root = {}, context = {}, variables = {}, operationName = null) => {
         try {
             return Observable.fromPromise(execute(
-                schema,
-                parsedQuery,
-                root,
-                context,
-                variables,
-                operationName
-            ));
-        } catch(err){
+                    schema,
+                    parsedQuery,
+                    root,
+                    context,
+                    variables,
+                    operationName
+                ))
+                .do(response => {
+                    if (response.errors) {
+                        throw new Error(response.errors.join());
+                    }
+                });
+        } catch (err) {
             return Observable.throw(err);
         }
     };
