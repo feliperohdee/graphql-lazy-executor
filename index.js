@@ -20,7 +20,7 @@ module.exports = (schema, query) => {
         return Observable.throw(new Error(errors));
     }
 
-    const executor = (root = {}, context = {}, variables = {}, operationName = null) => {
+    return (root = {}, context = {}, variables = {}, operationName = null) => {
         try {
             return Observable.fromPromise(execute(
                     schema,
@@ -39,8 +39,4 @@ module.exports = (schema, query) => {
             return Observable.throw(err);
         }
     };
-
-    executor.parsedQuery = parsedQuery;
-
-    return executor;
 };
