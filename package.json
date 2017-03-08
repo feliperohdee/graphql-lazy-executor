@@ -1,6 +1,6 @@
 {
   "name": "smallorange-graphql-lazy-executor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "This executor pre validate and parse the query and returns a function to execute it.",
   "main": "index.js",
   "scripts": {
