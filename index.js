@@ -17,7 +17,7 @@ module.exports = (schema, query) => {
     );
 
     if (errors.length) {
-        return Observable.throw(new Error(errors));
+        throw new Error(errors);
     }
 
     return (root = {}, context = {}, variables = {}, operationName = null) => {

@@ -240,13 +240,8 @@ describe('index.js', () => {
             });
     });
 
-    it('should handle query error', done => {
-        lazyExecutor(schema, `{name{name}}`)
-            .subscribe(null, err => {
-                expect(err.message).to.equal('GraphQLError: Field "name" must not have a selection since type "String" has no subfields.');
-
-                done();
-            });
+    it('should handle query error', () => {
+        expect(() => lazyExecutor(schema, `{name{name}}`)).to.throw('GraphQLError: Field "name" must not have a selection since type "String" has no subfields.');
     });
 
     it('should handle internal error', done => {
