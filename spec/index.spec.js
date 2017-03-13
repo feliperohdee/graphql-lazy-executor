@@ -71,10 +71,11 @@ describe('index.js', () => {
         executeSpy.restore();
     });
 
-    it('should return a function', () => {
+    it('should return a function and parsed query', () => {
         const executor = lazyExecutor(schema, `{name}`);
 
         expect(executor).to.be.a('function');
+        expect(executor.parsedQuery).to.be.an('object');
     });
 
     it('should pass root and context', done => {
