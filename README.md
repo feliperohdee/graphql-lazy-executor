@@ -7,7 +7,9 @@ This executor pre validate and parse the query and returns a function which once
 ## Api
 		lazyExecutor(
 			schema: GraphQLSchema, 
-			query: string): (
+			query: string,
+			validators?: GraphQLValidator | Array<GraphQLValidator>
+			): (
 				root: object = {};
 				context: object = {};
 				variables: object = {};

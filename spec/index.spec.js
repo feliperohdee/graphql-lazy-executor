@@ -7,7 +7,8 @@ const {
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLString,
-    GraphQLInt
+    GraphQLInt,
+    GraphQLError
 } = require('graphql');
 
 const lazyExecutor = require('../');
@@ -58,6 +59,14 @@ const schema = new GraphQLSchema({
     }),
 });
 
+const customValidator = context => {
+    return {
+        OperationDefinition: node => {
+            context.reportError(new GraphQLError('Custom validation error', [node]));
+        }
+    }
+};
+
 describe('index.js', () => {
     let executeSpy;
 
@@ -76,6 +85,10 @@ describe('index.js', () => {
 
         expect(executor).to.be.a('function');
         expect(executor.parsedQuery).to.be.an('object');
+    });
+
+    it('should concat custom validator', () => {
+        expect(() => lazyExecutor(schema, `{name}`, customValidator)).to.throw('GraphQLError: Custom validation error');
     });
 
     it('should pass root and context', done => {

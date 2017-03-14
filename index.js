@@ -8,12 +8,12 @@ const {
     specifiedRules
 } = require('graphql');
 
-module.exports = (schema, query) => {
+module.exports = (schema, query, validators = []) => {
     const parsedQuery = parse(query);
     const errors = validate(
         schema,
         parsedQuery,
-        specifiedRules
+        specifiedRules.concat(validators)
     );
 
     if (errors.length) {
