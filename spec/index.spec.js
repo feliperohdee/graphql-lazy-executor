@@ -80,11 +80,11 @@ describe('index.js', () => {
         executeSpy.restore();
     });
 
-    it('should return a function and parsed query', () => {
+    it('should return a function and ast', () => {
         const executor = lazyExecutor(schema, `{name}`);
 
         expect(executor).to.be.a('function');
-        expect(executor.parsedQuery).to.be.an('object');
+        expect(executor.ast).to.be.an('object');
     });
 
     it('should concat custom validator', () => {

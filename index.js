@@ -8,11 +8,11 @@ const {
     specifiedRules
 } = require('graphql');
 
-module.exports = (schema, query, validators = []) => {
-    const parsedQuery = parse(query);
+module.exports = (schema, requestString, validators = []) => {
+    const ast = parse(requestString);
     const errors = validate(
         schema,
-        parsedQuery,
+        ast,
         specifiedRules.concat(validators)
     );
 
@@ -24,7 +24,7 @@ module.exports = (schema, query, validators = []) => {
         try {
             return Observable.fromPromise(execute(
                     schema,
-                    parsedQuery,
+                    ast,
                     root,
                     context,
                     variables,
@@ -40,7 +40,7 @@ module.exports = (schema, query, validators = []) => {
         }
     };
 
-    executor.parsedQuery = parsedQuery;
+    executor.ast = ast;
 
     return executor;
 };
