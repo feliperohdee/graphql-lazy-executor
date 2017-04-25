@@ -2,6 +2,9 @@ const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 
+const {
+    Observable
+} = require('rxjs');
 const graphqlExecution = require('graphql/execution/execute');
 const {
     GraphQLSchema,
@@ -80,11 +83,11 @@ describe('index.js', () => {
         executeSpy.restore();
     });
 
-    it('should return a function and ast', () => {
+    it('should return a function and documentAST', () => {
         const executor = lazyExecutor(schema, `{name}`);
 
         expect(executor).to.be.a('function');
-        expect(executor.ast).to.be.an('object');
+        expect(executor.documentAST).to.be.an('object');
     });
 
     it('should concat custom validator', () => {
@@ -129,6 +132,25 @@ describe('index.js', () => {
             .subscribe(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde'
+                });
+            }, null, done);
+    });
+
+    it('should execute query with custom executor', done => {
+        const doStub = sinon.stub();
+        const customExecutor = (...args) => Observable.fromPromise(graphqlExecution.execute.apply(null, args))
+            .do(doStub);
+
+        const nameQuery = lazyExecutor(schema, `{name}`, [], customExecutor);
+
+        nameQuery({
+                name: 'Rohde'
+            })
+            .subscribe(() => {                
+                expect(doStub).to.have.been.calledWith({
+                    data: {
+                        name: 'Rohde'
+                    }
                 });
             }, null, done);
     });

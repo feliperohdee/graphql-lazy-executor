@@ -7,12 +7,13 @@ This executor pre validate and parse the query and returns a function which once
 ## Api
 		lazyExecutor(
 			schema: GraphQLSchema, 
-			query: string,
-			validators?: GraphQLValidator | Array<GraphQLValidator>
+			requestString: string,
+			customValidators?: GraphQLValidator | Array<GraphQLValidator>
+			customExecutor?: function = (/* args like http://graphql.org/graphql-js/execution/#execute*/) => Observable
 			): (
-				root: object = {};
-				context: object = {};
-				variables: object = {};
+				rootValue: object = {};
+				contextValue: object = {};
+				variableValues: object = {};
 				operationName: string = null
 			): Observable<any>;
 
@@ -68,7 +69,7 @@ This executor pre validate and parse the query and returns a function which once
                 name: 'Rohde',
                 dog: 'Heron'
             }, {
-                context: 'context'
+                contextValue: 'contextValue'
             })
             .subscribe(console.log);
 
