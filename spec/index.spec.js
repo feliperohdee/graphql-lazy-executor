@@ -7,6 +7,8 @@ const {
 } = require('rxjs');
 const graphqlExecution = require('graphql/execution/execute');
 const {
+    execute,
+    parse,
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLString,
@@ -137,9 +139,9 @@ describe('index.js', () => {
     });
 
     it('should execute query with custom executor', done => {
-        const doStub = sinon.stub();
-        const customExecutor = (...args) => Observable.fromPromise(graphqlExecution.execute.apply(null, args))
-            .do(doStub);
+        const customExecutorStub = sinon.stub();
+        const customExecutor = (...args) => Observable.fromPromise(execute.apply(null, args))
+            .do(customExecutorStub);
 
         const nameQuery = lazyExecutor(schema, `{name}`, [], customExecutor);
 
@@ -147,7 +149,7 @@ describe('index.js', () => {
                 name: 'Rohde'
             })
             .subscribe(() => {                
-                expect(doStub).to.have.been.calledWith({
+                expect(customExecutorStub).to.have.been.calledWith({
                     data: {
                         name: 'Rohde'
                     }
