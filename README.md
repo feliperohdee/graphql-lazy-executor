@@ -9,13 +9,7 @@ This executor pre validate and parse the query and returns a function which once
 			schema: GraphQLSchema, 
 			requestString: string,
 			customValidators?: GraphQLValidator | Array<GraphQLValidator>
-			customExecutor?: function = (/* args like http://graphql.org/graphql-js/execution/#execute*/) => Observable
-			): (
-				rootValue: object = {};
-				contextValue: object = {};
-				variableValues: object = {};
-				operationName: string = null
-			): Observable<any>;
+			customExecutor?: function(/* args like http://graphql.org/graphql-js/execution/#execute*/): MaybePromise<ExecutionResult>;
 
 ## Sample
 		const {
@@ -69,9 +63,11 @@ This executor pre validate and parse the query and returns a function which once
                 name: 'Rohde',
                 dog: 'Heron'
             }, {
+                variableValues: 'variableValues'
+            }, {
                 contextValue: 'contextValue'
             })
-            .subscribe(console.log);
+            .then(console.log);
 
             // will print
             {
