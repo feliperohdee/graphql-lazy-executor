@@ -83,24 +83,37 @@ describe('index.js', () => {
     });
 
     it('should return a function and documentAST', () => {
-        const executor = lazyExecutor(schema, `{name}`);
+        const executor = lazyExecutor({
+            schema,
+            source: `{name}`
+        });
 
         expect(executor).to.be.a('function');
         expect(executor.documentAST).to.be.an('object');
     });
 
     it('should concat custom validator', () => {
-        expect(() => lazyExecutor(schema, `{name}`, customValidator)).to.throw('Custom validation error');
+        expect(() => lazyExecutor({
+            customValidators: [customValidator],
+            schema,
+            source: `{name}`,
+        })).to.throw('Custom validation error');
     });
 
     it('should pass root and context', done => {
-        const nameDogQuery = lazyExecutor(schema, `{name, dog}`);
+        const nameDogQuery = lazyExecutor({
+            schema,
+            source: `{name, dog}`
+        });
 
         nameDogQuery({
-                name: 'Rohde',
-                dog: 'Heron'
-            }, null, {
-                context: 'context'
+                rootValue: {
+                    name: 'Rohde',
+                    dog: 'Heron'
+                },
+                contextValue: {
+                    context: 'context'
+                }
             })
             .then(response => {
                 expect(callback).to.have.been.calledWith({
@@ -115,10 +128,15 @@ describe('index.js', () => {
     });
 
     it('should execute query', done => {
-        const nameQuery = lazyExecutor(schema, `{name}`);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `{name}`
+        });
 
         nameQuery({
-                name: 'Rohde'
+                rootValue: {
+                    name: 'Rohde'
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -134,10 +152,16 @@ describe('index.js', () => {
         const customExecutor = (...args) => Promise.resolve(execute.apply(null, args))
             .then(customExecutorResponse);
 
-        const nameQuery = lazyExecutor(schema, `{name}`, [], customExecutor);
+        const nameQuery = lazyExecutor({
+            customExecutor,
+            schema,
+            source: `{name}`
+        });
 
         nameQuery({
-                name: 'Rohde'
+                rootValue: {
+                    name: 'Rohde'
+                }
             })
             .then(() => {
                 expect(customExecutorResponse).to.have.been.calledWith({
@@ -151,10 +175,15 @@ describe('index.js', () => {
     });
 
     it('should execute query with args', done => {
-        const nameQuery = lazyExecutor(schema, `{name(age: 20)}`);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `{name(age: 20)}`
+        });
 
         nameQuery({
-                name: 'Rohde'
+                rootValue: {
+                    name: 'Rohde'
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -166,11 +195,16 @@ describe('index.js', () => {
     });
 
     it('should execute multiple queries', done => {
-        const nameDogQuery = lazyExecutor(schema, `{name, dog}`);
+        const nameDogQuery = lazyExecutor({
+            schema,
+            source: `{name, dog}`
+        });
 
         nameDogQuery({
-                name: 'Rohde',
-                dog: 'Heron'
+                rootValue: {
+                    name: 'Rohde',
+                    dog: 'Heron'
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -183,11 +217,16 @@ describe('index.js', () => {
     });
 
     it('should execute multiple queries with args', done => {
-        const nameDogQuery = lazyExecutor(schema, `{name(age: 20), dog(age: 3)}`);
+        const nameDogQuery = lazyExecutor({
+            schema,
+            source: `{name(age: 20), dog(age: 3)}`
+        });
 
         nameDogQuery({
-                name: 'Rohde',
-                dog: 'Heron'
+                rootValue: {
+                    name: 'Rohde',
+                    dog: 'Heron'
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -200,16 +239,18 @@ describe('index.js', () => {
     });
 
     it('should execute query with variables', done => {
-        const nameQuery = lazyExecutor(schema, `
-            query($age: Int!){
-                name(age: $age)
-            }
-        `);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `query($age: Int!){name(age: $age)}`
+        });
 
         nameQuery({
-                name: 'Rohde'
-            }, {
-                age: 20
+                rootValue: {
+                    name: 'Rohde'
+                },
+                variableValues: {
+                    age: 20
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -221,19 +262,20 @@ describe('index.js', () => {
     });
 
     it('should execute multiple queries with variables', done => {
-        const nameQuery = lazyExecutor(schema, `
-            query($age: Int!, $dogAge: Int!){
-                name(age: $age)
-                dog(age: $dogAge)
-            }
-        `);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `query($age: Int!, $dogAge: Int!){ name(age: $age) dog(age: $dogAge)}`
+        });
 
         nameQuery({
-                name: 'Rohde',
-                dog: 'Heron'
-            }, {
-                age: 20,
-                dogAge: 3
+                rootValue: {
+                    name: 'Rohde',
+                    dog: 'Heron'
+                },
+                variableValues: {
+                    age: 20,
+                    dogAge: 3
+                }
             })
             .then(response => {
                 expect(response.data).to.deep.equal({
@@ -246,16 +288,18 @@ describe('index.js', () => {
     });
 
     it('should handle query runtime errors', done => {
-        const nameQuery = lazyExecutor(schema, `
-            query($age: Int!){
-                name(age: $age)
-            }
-        `);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `query($age: Int!){name(age: $age)}`
+        });
 
         nameQuery({
-                name: 'Rohde'
-            }, {
-                age: 'NaN'
+                rootValue: {
+                    name: 'Rohde'
+                },
+                variableValues: {
+                    age: 'NaN'
+                }
             })
             .catch(err => {
                 expect(err.message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non 32-bit signed integer value: NaN')
@@ -265,14 +309,15 @@ describe('index.js', () => {
     });
 
     it('should handle missing variable errors', done => {
-        const nameQuery = lazyExecutor(schema, `
-            query($age: Int!){
-                name(age: $age)
-            }
-        `);
+        const nameQuery = lazyExecutor({
+            schema,
+            source: `query($age: Int!){name(age: $age)}`
+        });
 
         nameQuery({
-                name: 'Rohde'
+                rootValue: {
+                    name: 'Rohde'
+                }
             })
             .catch(err => {
                 expect(err.message).to.equal('Variable "$age" of required type "Int!" was not provided.')
@@ -282,16 +327,25 @@ describe('index.js', () => {
     });
 
     it('should handle query error', () => {
-        expect(() => lazyExecutor(schema, `{name{name}}`)).to.throw('Field "name" must not have a selection since type "String" has no subfields.');
+        expect(() => lazyExecutor({
+            schema,
+            source: `{name{name}}`
+        })).to.throw('Field "name" must not have a selection since type "String" has no subfields.');
     });
 
     it('should handle internal error', done => {
-        const errorQuery = lazyExecutor(schema, `{name}`, [], () => {
-            throw new Error('error');
+        const errorQuery = lazyExecutor({
+            customExecutor: () => {
+                throw new Error('error');
+            },
+            schema,
+            source: `{name}`
         });
 
         errorQuery({
-                name: 'Rohde'
+                rootValue: {
+                    name: 'Rohde'
+                }
             })
             .catch(err => {
                 expect(err.message).to.equal('error');

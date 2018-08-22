@@ -57,16 +57,23 @@ This executor pre validate and parse the query and returns a function which once
 		    }),
 		});
 
-		const nameDogQuery = lazyExecutor(schema, `{name, dog}`);
+		const nameDogQuery = lazyExecutor({
+			schema, 
+			source: `{name, dog}`
+		});
 
         nameDogQuery({
-                name: 'Rohde',
-                dog: 'Heron'
-            }, {
-                variableValues: 'variableValues'
-            }, {
-                contextValue: 'contextValue'
-            })
+				contextValue: {
+					contextValue: 'contextValue'
+				},
+				rootValue: {
+					name: 'Rohde',
+					dog: 'Heron'
+				},
+				variableValues: {
+					variableValues: 'variableValues'
+				}
+			})
             .then(console.log);
 
             // will print

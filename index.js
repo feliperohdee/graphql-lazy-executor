@@ -5,7 +5,14 @@ const {
     specifiedRules
 } = require('graphql');
 
-module.exports = (schema, source, customValidators = [], customExecutor = null) => {
+module.exports = (args = {}) => {
+    const {
+        schema,
+        source,
+        customValidators = [],
+        customExecutor = null
+    } = args;
+
     const documentAST = parse(source);
     const errors = validate(
         schema,
@@ -17,7 +24,14 @@ module.exports = (schema, source, customValidators = [], customExecutor = null) 
         throw new Error(errors.map(err => err.message));
     }
 
-    const executor = (rootValue = {}, variableValues = {}, contextValue = {}, operationName = null) => {
+    const executor = (args = {}) => {
+        const {
+            contextValue = {},
+            operationName = null,
+            rootValue = {},
+            variableValues = {}
+        } = args;
+
         try {
             const executorArgs = [
                 schema,
