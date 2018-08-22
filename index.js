@@ -1,15 +1,12 @@
 const {
-    Observable
-} = require('rxjs');
-const {
     parse,
     validate,
     execute,
     specifiedRules
 } = require('graphql');
 
-module.exports = (schema, requestString, customValidators = [], customExecutor = null) => {
-    const documentAST = parse(requestString);
+module.exports = (schema, source, customValidators = [], customExecutor = null) => {
+    const documentAST = parse(source);
     const errors = validate(
         schema,
         documentAST,
@@ -17,10 +14,10 @@ module.exports = (schema, requestString, customValidators = [], customExecutor =
     );
 
     if (errors.length) {
-        throw new Error(errors);
+        throw new Error(errors.map(err => err.message));
     }
 
-    const executor = (rootValue = {}, contextValue = {}, variableValues = {}, operationName = null) => {
+    const executor = (rootValue = {}, variableValues = {}, contextValue = {}, operationName = null) => {
         try {
             const executorArgs = [
                 schema,
@@ -31,16 +28,21 @@ module.exports = (schema, requestString, customValidators = [], customExecutor =
                 operationName
             ];
 
-            const executor = customExecutor ? customExecutor.apply(null, executorArgs) : Observable.fromPromise(execute.apply(null, executorArgs));
+            let executor = customExecutor ? customExecutor.apply(null, executorArgs) : execute.apply(null, executorArgs);
 
-            return executor
-                .do(response => {
-                    if (response.errors) {
-                        throw new Error(response.errors.join());
-                    }
-                });
+            if(!executor.then) {
+                executor = Promise.resolve(executor);
+            }
+
+            return executor.then(response => {
+                if (response && response.errors) {
+                    throw new Error(response.errors.map(err => err.message));
+                }
+
+                return response;
+            });
         } catch (err) {
-            return Observable.throw(err);
+            return Promise.reject(err);
         }
     };
 

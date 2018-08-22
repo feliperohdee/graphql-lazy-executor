@@ -2,9 +2,6 @@ const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 
-const {
-    Observable
-} = require('rxjs');
 const graphqlExecution = require('graphql/execution/execute');
 const {
     execute,
@@ -93,7 +90,7 @@ describe('index.js', () => {
     });
 
     it('should concat custom validator', () => {
-        expect(() => lazyExecutor(schema, `{name}`, customValidator)).to.throw('GraphQLError: Custom validation error');
+        expect(() => lazyExecutor(schema, `{name}`, customValidator)).to.throw('Custom validation error');
     });
 
     it('should pass root and context', done => {
@@ -102,27 +99,19 @@ describe('index.js', () => {
         nameDogQuery({
                 name: 'Rohde',
                 dog: 'Heron'
-            }, {
+            }, null, {
                 context: 'context'
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(callback).to.have.been.calledWith({
                     name: 'Rohde',
                     dog: 'Heron'
                 }, {
                     context: 'context'
                 });
-            }, null, done);
-    });
 
-    it('should not execute query if no one subscribed', () => {
-        const nameQuery = lazyExecutor(schema, `{name}`);
-
-        nameQuery({
-            name: 'Rohde'
-        });
-
-        expect(executeSpy).not.to.have.been.called;
+                done();
+            });
     });
 
     it('should execute query', done => {
@@ -131,30 +120,34 @@ describe('index.js', () => {
         nameQuery({
                 name: 'Rohde'
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
-    it('should execute query with custom executor', done => {
-        const customExecutorStub = sinon.stub();
-        const customExecutor = (...args) => Observable.fromPromise(execute.apply(null, args))
-            .do(customExecutorStub);
+    it('should execute query with custom async executor', done => {
+        const customExecutorResponse = sinon.stub();
+        const customExecutor = (...args) => Promise.resolve(execute.apply(null, args))
+            .then(customExecutorResponse);
 
         const nameQuery = lazyExecutor(schema, `{name}`, [], customExecutor);
 
         nameQuery({
                 name: 'Rohde'
             })
-            .subscribe(() => {                
-                expect(customExecutorStub).to.have.been.calledWith({
+            .then(() => {
+                expect(customExecutorResponse).to.have.been.calledWith({
                     data: {
                         name: 'Rohde'
                     }
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should execute query with args', done => {
@@ -163,11 +156,13 @@ describe('index.js', () => {
         nameQuery({
                 name: 'Rohde'
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde - 20'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should execute multiple queries', done => {
@@ -177,12 +172,14 @@ describe('index.js', () => {
                 name: 'Rohde',
                 dog: 'Heron'
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde',
                     dog: 'Heron'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should execute multiple queries with args', done => {
@@ -192,12 +189,14 @@ describe('index.js', () => {
                 name: 'Rohde',
                 dog: 'Heron'
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde - 20',
                     dog: 'Heron - 3'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should execute query with variables', done => {
@@ -209,14 +208,16 @@ describe('index.js', () => {
 
         nameQuery({
                 name: 'Rohde'
-            }, null, {
+            }, {
                 age: 20
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde - 20'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should execute multiple queries with variables', done => {
@@ -230,16 +231,18 @@ describe('index.js', () => {
         nameQuery({
                 name: 'Rohde',
                 dog: 'Heron'
-            }, null, {
+            }, {
                 age: 20,
                 dogAge: 3
             })
-            .subscribe(response => {
+            .then(response => {
                 expect(response.data).to.deep.equal({
                     name: 'Rohde - 20',
                     dog: 'Heron - 3'
                 });
-            }, null, done);
+
+                done();
+            });
     });
 
     it('should handle query runtime errors', done => {
@@ -251,11 +254,11 @@ describe('index.js', () => {
 
         nameQuery({
                 name: 'Rohde'
-            }, null, {
+            }, {
                 age: 'NaN'
             })
-            .subscribe(null, err => {
-                expect(err.message).to.equal('Variable "$age" got invalid value "NaN".\nExpected type "Int", found "NaN": Int cannot represent non 32-bit signed integer value: NaN')
+            .catch(err => {
+                expect(err.message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non 32-bit signed integer value: NaN')
 
                 done();
             });
@@ -271,7 +274,7 @@ describe('index.js', () => {
         nameQuery({
                 name: 'Rohde'
             })
-            .subscribe(null, err => {
+            .catch(err => {
                 expect(err.message).to.equal('Variable "$age" of required type "Int!" was not provided.')
 
                 done();
@@ -279,17 +282,19 @@ describe('index.js', () => {
     });
 
     it('should handle query error', () => {
-        expect(() => lazyExecutor(schema, `{name{name}}`)).to.throw('GraphQLError: Field "name" must not have a selection since type "String" has no subfields.');
+        expect(() => lazyExecutor(schema, `{name{name}}`)).to.throw('Field "name" must not have a selection since type "String" has no subfields.');
     });
 
     it('should handle internal error', done => {
-        const errorQuery = lazyExecutor(schema, `{
-            error
-        }`);
+        const errorQuery = lazyExecutor(schema, `{name}`, [], () => {
+            throw new Error('error');
+        });
 
-        errorQuery()
-            .subscribe(null, err => {
-                expect(err.message).to.equal('GraphQLError: error');
+        errorQuery({
+                name: 'Rohde'
+            })
+            .catch(err => {
+                expect(err.message).to.equal('error');
                 done();
             });
     });
