@@ -48,13 +48,7 @@ module.exports = (args = {}) => {
                 executor = Promise.resolve(executor);
             }
 
-            return executor.then(response => {
-                if (response && response.errors) {
-                    throw new Error(response.errors.map(err => err.message));
-                }
-
-                return response;
-            });
+            return executor;
         } catch (err) {
             return Promise.reject(err);
         }

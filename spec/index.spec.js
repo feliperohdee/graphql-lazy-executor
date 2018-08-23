@@ -301,8 +301,10 @@ describe('index.js', () => {
                     age: 'NaN'
                 }
             })
-            .catch(err => {
-                expect(err.message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non 32-bit signed integer value: NaN')
+            .then(({
+                errors
+            }) => {
+                expect(errors[0].message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non 32-bit signed integer value: NaN')
 
                 done();
             });
@@ -319,8 +321,10 @@ describe('index.js', () => {
                     name: 'Rohde'
                 }
             })
-            .catch(err => {
-                expect(err.message).to.equal('Variable "$age" of required type "Int!" was not provided.')
+            .then(({
+                errors
+            }) => {
+                expect(errors[0].message).to.equal('Variable "$age" of required type "Int!" was not provided.')
 
                 done();
             });
