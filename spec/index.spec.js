@@ -81,7 +81,7 @@ describe('index.js', () => {
     after(() => {
         executeSpy.restore();
     });
-
+    
     it('should return a function and documentAST', () => {
         const executor = lazyExecutor({
             schema,
@@ -304,7 +304,7 @@ describe('index.js', () => {
             .then(({
                 errors
             }) => {
-                expect(errors[0].message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non 32-bit signed integer value: NaN')
+                expect(errors[0].message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non-integer value: "NaN"')
 
                 done();
             });

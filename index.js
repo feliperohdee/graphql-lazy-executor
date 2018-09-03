@@ -1,17 +1,20 @@
-const {
-    parse,
-    validate,
-    execute,
-    specifiedRules
-} = require('graphql');
+const graphqlRoot = require('graphql');
 
 module.exports = (args = {}) => {
     const {
+        graphql,
         schema,
         source,
         customValidators = [],
         customExecutor = null
     } = args;
+
+    const {
+        parse,
+        validate,
+        execute,
+        specifiedRules
+    } = graphql || graphqlRoot;
 
     const documentAST = parse(source);
     const errors = validate(
