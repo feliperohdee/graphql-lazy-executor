@@ -1,6 +1,4 @@
-[![CircleCI](https://circleci.com/gh/feliperohdee/smallorange-graphql-lazy-executor.svg?style=svg)](https://circleci.com/gh/feliperohdee/smallorange-graphql-lazy-executor)
-
-# Small Orange GraphQL Lazy Executor
+# GraphQL Lazy Executor
 
 This executor pre validate and parse the query and returns a function which once executed, it returns a RxJS Observable with the result. Useful in high performance scenarios, once the query can be pre validated and parsed, and postpone the execution.
 
@@ -19,7 +17,7 @@ This executor pre validate and parse the query and returns a function which once
 		    GraphQLInt
 		} = require('graphql');
 
-		const lazyExecutor = require('smallorange-graphql-lazy-executor');
+		const lazyExecutor = require('graphql-lazy-executor');
 
 		const schema = new GraphQLSchema({
 		    query: new GraphQLObjectType({

@@ -5,7 +5,6 @@ const sinonChai = require('sinon-chai');
 const graphqlExecution = require('graphql/execution/execute');
 const {
     execute,
-    parse,
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLString,
@@ -13,7 +12,7 @@ const {
     GraphQLError
 } = require('graphql');
 
-const lazyExecutor = require('../');
+const lazyExecutor = require('./');
 
 chai.use(sinonChai);
 
@@ -58,7 +57,7 @@ const schema = new GraphQLSchema({
                 }
             }
         }
-    }),
+    })
 });
 
 const customValidator = context => {
@@ -66,7 +65,7 @@ const customValidator = context => {
         OperationDefinition: node => {
             context.reportError(new GraphQLError('Custom validation error', [node]));
         }
-    }
+    };
 };
 
 describe('index.js', () => {
@@ -96,7 +95,7 @@ describe('index.js', () => {
         expect(() => lazyExecutor({
             customValidators: [customValidator],
             schema,
-            source: `{name}`,
+            source: `{name}`
         })).to.throw('Custom validation error');
     });
 
@@ -304,8 +303,7 @@ describe('index.js', () => {
             .then(({
                 errors
             }) => {
-                expect(errors[0].message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int; Int cannot represent non-integer value: "NaN"')
-
+                expect(errors[0].message).to.equal('Variable "$age" got invalid value "NaN"; Expected type Int. Int cannot represent non-integer value: "NaN"');
                 done();
             });
     });
@@ -324,7 +322,7 @@ describe('index.js', () => {
             .then(({
                 errors
             }) => {
-                expect(errors[0].message).to.equal('Variable "$age" of required type "Int!" was not provided.')
+                expect(errors[0].message).to.equal('Variable "$age" of required type "Int!" was not provided.');
 
                 done();
             });
