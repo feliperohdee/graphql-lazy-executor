@@ -1,6 +1,6 @@
 {
     "name": "graphql-lazy-executor",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "This executor pre validate and parse the query and returns a function to execute it.",
     "main": "index.js",
     "scripts": {

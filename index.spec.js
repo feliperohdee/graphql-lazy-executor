@@ -81,7 +81,7 @@ describe('index.js', () => {
         executeSpy.restore();
     });
     
-    it('should return a function and documentAST', () => {
+    it('should return a function and documentAST with source', () => {
         const executor = lazyExecutor({
             schema,
             source: `{name}`
@@ -89,6 +89,21 @@ describe('index.js', () => {
 
         expect(executor).to.be.a('function');
         expect(executor.documentAST).to.be.an('object');
+    });
+    
+    it('should return a function and documentAST with documentAST', () => {
+        const executor = lazyExecutor({
+            schema,
+            source: `{name}`
+        });
+        
+        const executor2 = lazyExecutor({
+            documentAST: executor.documentAST,
+            schema
+        });
+
+        expect(executor2).to.be.a('function');
+        expect(executor2.documentAST).to.deep.equal(executor.documentAST);
     });
 
     it('should concat custom validator', () => {

@@ -1,7 +1,8 @@
 const graphqlRoot = require('graphql');
 
 module.exports = (args = {}) => {
-    const {
+    let {
+        documentAST,
         graphql,
         schema,
         source,
@@ -16,7 +17,10 @@ module.exports = (args = {}) => {
         specifiedRules
     } = graphql || graphqlRoot;
 
-    const documentAST = parse(source);
+    if (!documentAST) {
+        documentAST = parse(source);
+    }
+
     const errors = validate(
         schema,
         documentAST,
@@ -47,7 +51,7 @@ module.exports = (args = {}) => {
 
             let executor = customExecutor ? customExecutor.apply(null, executorArgs) : execute.apply(null, executorArgs);
 
-            if(!executor.then) {
+            if (!executor.then) {
                 executor = Promise.resolve(executor);
             }
 
